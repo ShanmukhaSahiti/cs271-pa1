@@ -9,6 +9,6 @@ public class Message {
 	private Type type;
 	private String clientId;
 	private int lamportClock;
-	private Block block;
+	private BlockDto block;
 	
 }
