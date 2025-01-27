@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class NetworkManager {
 	private List<ClientConnection> activeConnections = new CopyOnWriteArrayList<>();
-	private static final int BASE_PORT = 8000;
 
 	@Autowired
     private BlockchainService blockchainService;
@@ -38,27 +37,31 @@ public class NetworkManager {
 		private BufferedReader in;
 	}
 
-	public void connectToClients(List<String> clientAddresses) {
-		for (String address : clientAddresses) {
+	public void connectToClients(List<Integer> clientAddresses) {
+		for (Integer address : clientAddresses) {
 			try {
-				Socket socket = new Socket(address, BASE_PORT);
+				Socket socket = new Socket("localhost", address);
 				ClientConnection connection = new ClientConnection();
 				connection.setSocket(socket);
 				connection.setOut(new PrintWriter(socket.getOutputStream(), true));
 				connection.setIn(new BufferedReader(new InputStreamReader(socket.getInputStream())));
 				activeConnections.add(connection);
 			} catch (IOException e) {
-				// Log connection failure
+				log.error("Failed to connect ", e);
 			}
 		}
 	}
 
 	public void broadcastTransaction(String transactionJson) {
+		log.info("Broadcasting transaction {}", transactionJson);
+		log.info("Active connections in broadcast = " + activeConnections.size());
 		activeConnections.forEach(conn -> conn.getOut().println(transactionJson));
 	}
 
 	public void listenForIncomingTransactions() {
+		log.info("Active connections in listen = " + activeConnections.size());
 		activeConnections.forEach(conn -> {
+			log.info("Listening to incoming transaction");
 			new Thread(() -> {
 				try {
 					String incomingMessage;
@@ -67,6 +70,7 @@ public class NetworkManager {
 					}
 				} catch (IOException e) {
 					// Handle connection interruption
+					log.error("Failed to listen for incoming transactions ", e);
 				}
 			}).start();
 		});

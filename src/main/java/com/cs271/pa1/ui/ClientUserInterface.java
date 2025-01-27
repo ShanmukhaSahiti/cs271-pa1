@@ -7,110 +7,108 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 @Component
 public class ClientUserInterface {
-    @Autowired
-    private BlockchainService blockchainService;
+	@Autowired
+	private BlockchainService blockchainService;
 
-    @Autowired
-    private NetworkManager networkManager;
+	@Autowired
+	private NetworkManager networkManager;
 
-    private String clientName;
-    private int clientIndex;
+	private String clientName;
 
-    public void start(String clientName, int clientIndex) {
-        this.clientName = clientName;
-        this.clientIndex = clientIndex;
-        
-        // Connect to clients
-        networkManager.connectToClients(
-            java.util.List.of("localhost", "localhost", "localhost")
-        );
+	public void start(String clientName, List<Integer> ports) {
+		this.clientName = clientName;
 
-        // Add 3-second startup delay
-        try {
-            TimeUnit.SECONDS.sleep(3);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+		// Connect to clients
+		networkManager.connectToClients(ports);
 
-        // Display initial balance
-        System.out.println("Client: " + clientName);
-        System.out.println("Initial Balance: $10");
+		// Add 3-second startup delay
+		try {
+			TimeUnit.SECONDS.sleep(3);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
 
-        // Start interactive menu
-        displayMenu();
-    }
+		// Display initial balance
+		System.out.println("Client: " + clientName);
+		System.out.println("Initial Balance: $10");
 
-    private void displayMenu() {
-        Scanner scanner = new Scanner(System.in);
-        while (true) {
-            System.out.println("\n--- Blockchain Transaction System ---");
-            System.out.println("1. Transfer Money");
-            System.out.println("2. Check Balance");
-            System.out.println("3. View Blockchain");
-            System.out.println("4. Exit");
-            System.out.print("Choose an option: ");
+		// Start interactive menu
+		displayMenu(ports);
+	}
 
-            int choice = scanner.nextInt();
-            switch (choice) {
-                case 1:
-                    performTransfer(scanner);
-                    break;
-                case 2:
-                    checkBalance(scanner);
-                    break;
-                case 3:
-                    viewBlockchain();
-                    break;
-                case 4:
-                    System.exit(0);
-                default:
-                    System.out.println("Invalid option. Try again.");
-            }
-        }
-    }
+	private void displayMenu(List<Integer> ports) {
+		Scanner scanner = new Scanner(System.in);
+		while (true) {
+			System.out.println("\n--- Blockchain Transaction System ---");
+			System.out.println("1. Transfer Money");
+			System.out.println("2. Check Balance");
+			System.out.println("3. View Blockchain");
+			System.out.println("4. Exit");
+			System.out.print("Choose an option: ");
 
-    private void performTransfer(Scanner scanner) {
-        System.out.print("Enter receiver client name (ClientA/ClientB/ClientC): ");
-        String receiver = scanner.next();
-        
-        System.out.print("Enter transfer amount: $");
-        BigDecimal amount = scanner.nextBigDecimal();
+			int choice = scanner.nextInt();
+			switch (choice) {
+			case 0:
+				networkManager.connectToClients(ports);
+				break;
+			case 1:
+				performTransfer(scanner);
+				break;
+			case 2:
+				checkBalance(scanner);
+				break;
+			case 3:
+				viewBlockchain();
+				break;
+			case 4:
+				System.exit(0);
+			default:
+				System.out.println("Invalid option. Try again.");
+			}
+		}
+	}
+	
+	private void performTransfer(Scanner scanner) {
+		System.out.print("Enter receiver client name (A/B/C): ");
+		String receiver = scanner.next();
 
-        TransactionDto transaction = TransactionDto.createTransaction(
-            this.clientName, receiver, amount
-        );
+		System.out.print("Enter transfer amount: $");
+		BigDecimal amount = scanner.nextBigDecimal();
 
-        // Broadcast transaction
-        networkManager.broadcastTransaction(transaction.toString());
+		TransactionDto transaction = TransactionDto.createTransaction(this.clientName, receiver, amount);
 
-        // Simulate network delay
-        try {
-            TimeUnit.SECONDS.sleep(3);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+		// Broadcast transaction
+//		networkManager.broadcastTransaction(transaction.toString());
 
-        // Check transaction result
-        BigDecimal beforeBalance = blockchainService.checkBalance(this.clientName);
-        boolean result = blockchainService.initiateTransaction(transaction);
-        BigDecimal afterBalance = blockchainService.checkBalance(this.clientName);
+		// Simulate network delay
+		try {
+			TimeUnit.SECONDS.sleep(3);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
 
-        System.out.println(result ? "SUCCESS" : "FAILED");
-        System.out.println("Before Balance: $" + beforeBalance);
-        System.out.println("After Balance: $" + afterBalance);
-    }
+		// Check transaction result
+		BigDecimal beforeBalance = blockchainService.checkBalance(this.clientName);
+		boolean result = blockchainService.initiateTransaction(transaction);
+		BigDecimal afterBalance = blockchainService.checkBalance(this.clientName);
 
-    private void checkBalance(Scanner scanner) {
-        BigDecimal balance = blockchainService.checkBalance(this.clientName);
-        System.out.println("Current Balance: $" + balance);
-    }
+		System.out.println(result ? "SUCCESS" : "FAILED");
+		System.out.println("Before Balance: $" + beforeBalance);
+		System.out.println("After Balance: $" + afterBalance);
+	}
 
-    private void viewBlockchain() {
-        blockchainService.getBlockchain().forEach(System.out::println);
-    }
+	private void checkBalance(Scanner scanner) {
+		BigDecimal balance = blockchainService.checkBalance(this.clientName);
+		System.out.println("Current Balance: $" + balance);
+	}
+
+	private void viewBlockchain() {
+		blockchainService.getBlockchain().forEach(System.out::println);
+	}
 }

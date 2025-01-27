@@ -1,9 +1,13 @@
 package com.cs271.pa1;
 
-import com.cs271.pa1.ui.ClientUserInterface;
+import java.util.List;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
+
+import com.cs271.pa1.dto.ClientPorts;
+import com.cs271.pa1.ui.ClientUserInterface;
 
 @SpringBootApplication
 public class Pa1Application {
@@ -14,19 +18,18 @@ public class Pa1Application {
         }
 
         String clientName = args[0];
-        int clientIndex = getClientIndex(clientName);
 
         ConfigurableApplicationContext context = SpringApplication.run(Pa1Application.class, args);
         ClientUserInterface userInterface = context.getBean(ClientUserInterface.class);
         
-        userInterface.start(clientName, clientIndex);
+        userInterface.start(clientName, getClientPorts(clientName));
     }
 
-    private static int getClientIndex(String clientName) {
+    private static List<Integer> getClientPorts(String clientName) {
         return switch(clientName) {
-            case "ClientA" -> 0;
-            case "ClientB" -> 1;
-            case "ClientC" -> 2;
+            case "A" -> List.of(ClientPorts.B.getPort(), ClientPorts.C.getPort());
+            case "B" -> List.of(ClientPorts.A.getPort(), ClientPorts.C.getPort());
+            case "C" -> List.of(ClientPorts.A.getPort(), ClientPorts.B.getPort());
             default -> throw new IllegalArgumentException("Invalid client name");
         };
     }

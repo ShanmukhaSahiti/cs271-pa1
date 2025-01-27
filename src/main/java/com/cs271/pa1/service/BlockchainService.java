@@ -41,9 +41,9 @@ public class BlockchainService {
 	}
 
 	private void initializeBalanceTable() {
-		balanceTable.put("ClientA", INITIAL_BALANCE);
-		balanceTable.put("ClientB", INITIAL_BALANCE);
-		balanceTable.put("ClientC", INITIAL_BALANCE);
+		balanceTable.put("A", INITIAL_BALANCE);
+		balanceTable.put("B", INITIAL_BALANCE);
+		balanceTable.put("C", INITIAL_BALANCE);
 	}
 
 	public boolean initiateTransaction(TransactionDto transaction) {
