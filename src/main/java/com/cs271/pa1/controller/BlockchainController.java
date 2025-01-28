@@ -18,8 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/client")
-public class TransactionController {
+@RequestMapping("/blockchain")
+public class BlockchainController {
     @Autowired
     private BlockchainService blockchainService;
 

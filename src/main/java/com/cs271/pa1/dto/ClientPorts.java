@@ -11,5 +11,4 @@ public enum ClientPorts {
 	C(8082);
 	
 	private final int port;
-	
 }

@@ -2,6 +2,7 @@ package com.cs271.pa1.ui;
 
 import com.cs271.pa1.dto.TransactionDto;
 import com.cs271.pa1.service.BlockchainService;
+import com.cs271.pa1.service.ClientPortService;
 import com.cs271.pa1.network.NetworkManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,9 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class ClientUserInterface {
 	@Autowired
+	private ClientPortService clientPortService;
+	
+	@Autowired
 	private BlockchainService blockchainService;
 
 	@Autowired
@@ -21,7 +25,8 @@ public class ClientUserInterface {
 
 	private String clientName;
 
-	public void start(String clientName, List<Integer> ports) {
+	public void start(String clientName) {
+		List<Integer> ports = clientPortService.getClientPorts(clientName);
 		this.clientName = clientName;
 
 		// Connect to clients
@@ -54,9 +59,6 @@ public class ClientUserInterface {
 
 			int choice = scanner.nextInt();
 			switch (choice) {
-			case 0:
-				networkManager.connectToClients(ports);
-				break;
 			case 1:
 				performTransfer(scanner);
 				break;
@@ -82,9 +84,6 @@ public class ClientUserInterface {
 		BigDecimal amount = scanner.nextBigDecimal();
 
 		TransactionDto transaction = TransactionDto.createTransaction(this.clientName, receiver, amount);
-
-		// Broadcast transaction
-//		networkManager.broadcastTransaction(transaction.toString());
 
 		// Simulate network delay
 		try {

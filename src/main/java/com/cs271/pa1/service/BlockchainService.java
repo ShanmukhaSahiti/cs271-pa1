@@ -13,12 +13,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.cs271.pa1.dto.BlockDto;
 import com.cs271.pa1.dto.TransactionDto;
-import com.cs271.pa1.network.NetworkManager;
+import com.cs271.pa1.proxy.ClientProxy;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,8 +32,7 @@ public class BlockchainService {
 	private LamportMutexService mutexService;
 
 	@Autowired
-	@Lazy
-	private NetworkManager networkManager;
+	private ClientProxy clientProxy;
 
 	public BlockchainService() {
 		initializeBalanceTable();
@@ -65,7 +63,8 @@ public class BlockchainService {
 			BlockDto newBlock = createBlock(transaction);
 			blockchain.add(0, newBlock);
 
-			networkManager.broadcastTransaction(newBlock.toString());
+			//networkManager.broadcastTransaction(newBlock.toString());
+			clientProxy.broadcastBlock(newBlock);
 			
 			updateBalances(transaction);
 			
