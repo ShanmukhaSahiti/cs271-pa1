@@ -1,53 +1,34 @@
 package com.cs271.pa1.ui;
 
-import com.cs271.pa1.dto.TransactionDto;
-import com.cs271.pa1.service.BlockchainService;
-import com.cs271.pa1.service.ClientPortService;
-import com.cs271.pa1.network.NetworkManager;
+import java.math.BigDecimal;
+import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
+import com.cs271.pa1.dto.TransactionDto;
+import com.cs271.pa1.service.BlockchainService;
 
 @Component
 public class ClientUserInterface {
 	@Autowired
-	private ClientPortService clientPortService;
-	
-	@Autowired
 	private BlockchainService blockchainService;
-
-	@Autowired
-	private NetworkManager networkManager;
 
 	private String clientName;
 
 	public void start(String clientName) {
-		List<Integer> ports = clientPortService.getClientPorts(clientName);
+		
 		this.clientName = clientName;
-
-		// Connect to clients
-		networkManager.connectToClients(ports);
-
-		// Add 3-second startup delay
-		try {
-			TimeUnit.SECONDS.sleep(3);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
-
 		// Display initial balance
 		System.out.println("Client: " + clientName);
 		System.out.println("Initial Balance: $10");
 
 		// Start interactive menu
-		displayMenu(ports);
+		displayMenu();
 	}
 
-	private void displayMenu(List<Integer> ports) {
+	private void displayMenu() {
 		Scanner scanner = new Scanner(System.in);
 		while (true) {
 			System.out.println("\n--- Blockchain Transaction System ---");

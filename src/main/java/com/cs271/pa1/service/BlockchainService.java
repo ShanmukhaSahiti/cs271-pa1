@@ -63,7 +63,6 @@ public class BlockchainService {
 			BlockDto newBlock = createBlock(transaction);
 			blockchain.add(0, newBlock);
 
-			//networkManager.broadcastTransaction(newBlock.toString());
 			clientProxy.broadcastBlock(newBlock);
 			
 			updateBalances(transaction);
