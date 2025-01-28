@@ -50,7 +50,7 @@ public class BlockchainService {
 			while (!mutexService.canEnterCriticalSection()) {
 				Thread.sleep(100); // Small delay to prevent busy waiting
 			}
-
+			mutexService.enterCriticalSection();
 			log.info("Initiating transaction: {}", transaction);
 
 			// Validate transaction
