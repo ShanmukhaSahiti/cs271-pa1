@@ -2,7 +2,6 @@ package com.cs271.pa1.ui;
 
 import java.math.BigDecimal;
 import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,7 +17,7 @@ public class ClientUserInterface {
 	private String clientName;
 
 	public void start(String clientName) {
-		
+
 		this.clientName = clientName;
 		// Display initial balance
 		System.out.println("Client: " + clientName);
@@ -56,7 +55,7 @@ public class ClientUserInterface {
 			}
 		}
 	}
-	
+
 	private void performTransfer(Scanner scanner) {
 		System.out.print("Enter receiver client name (A/B/C): ");
 		String receiver = scanner.next();
@@ -65,13 +64,6 @@ public class ClientUserInterface {
 		BigDecimal amount = scanner.nextBigDecimal();
 
 		TransactionDto transaction = TransactionDto.createTransaction(this.clientName, receiver, amount);
-
-		// Simulate network delay
-		try {
-			TimeUnit.SECONDS.sleep(3);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
 
 		// Check transaction result
 		BigDecimal beforeBalance = blockchainService.checkBalance(this.clientName);

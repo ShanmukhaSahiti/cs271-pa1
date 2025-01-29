@@ -4,16 +4,17 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.cs271.pa1.dto.Request;
 import com.cs271.pa1.proxy.LamportProxy;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -22,8 +23,12 @@ public class LamportMutexService {
 	@Autowired
 	private LamportProxy lamportProxy;
 
+	@Autowired
+	private ClientPortService clientPortService;
+
 	// Process identification
-	private final String processId = UUID.randomUUID().toString();
+	@Value("${server.port}")
+	private String processId;
 
 	// Lamport clock
 	private long lamportClock = 0;
@@ -42,6 +47,19 @@ public class LamportMutexService {
 
 	// Flag to track if we're in critical section
 	private volatile boolean inCriticalSection = false;
+
+	@PostConstruct
+	public void init() {
+		for (Integer port : clientPortService.getClientPorts()) {
+			registerProcess(port + "", "http://localhost:" + port);
+		}
+		for(String p: otherProcesses) {
+			log.info(p);
+		}
+		for(String p: processUrls.keySet()) {
+			log.info(p+"*"+processUrls.get(p));
+		}
+	}
 
 	/**
 	 * Gets the current process ID
@@ -80,11 +98,11 @@ public class LamportMutexService {
 
 		// Add to local queue
 		requestQueue.add(request);
-		log.debug("Added request to queue: {}", request);
+		log.info("Added request to queue: {}", request);
 
 		// Initialize reply tracker
 		replyTracker.put(processId, Collections.synchronizedSet(new HashSet<>()));
-
+		log.info("Broadcasting request to all");
 		// Broadcast request to all other processes
 		broadcastRequest(request);
 	}
@@ -93,7 +111,7 @@ public class LamportMutexService {
 	 * Handles incoming request from other process
 	 */
 	public synchronized void receiveRequest(Request request) {
-		log.debug("Received request from process {}: {}", request.getProcessId(), request);
+		log.info("Received request from process {}: {}", request.getProcessId(), request);
 
 		// Update local clock
 		updateClock(request.getTimestamp());
@@ -109,7 +127,7 @@ public class LamportMutexService {
 	 * Processes reply from other process
 	 */
 	public synchronized void receiveReply(String fromProcessId, long timestamp) {
-		log.debug("Received reply from process: {}", fromProcessId);
+		log.info("Received reply from process: {}", fromProcessId);
 
 		// Update local clock
 		updateClock(timestamp);
@@ -118,7 +136,7 @@ public class LamportMutexService {
 		Set<String> replies = replyTracker.get(processId);
 		if (replies != null) {
 			replies.add(fromProcessId);
-			log.debug("Added reply from {} to tracker. Total replies: {}", fromProcessId, replies.size());
+			log.info("Added reply from {} to tracker. Total replies: {}", fromProcessId, replies.size());
 		}
 	}
 
@@ -148,7 +166,7 @@ public class LamportMutexService {
 		}
 
 		boolean canEnter = earliestRequest && allRepliesReceived;
-		log.debug("Can enter critical section: {} (earliest: {}, allReplies: {})", canEnter, earliestRequest,
+		log.info("Can enter critical section: {} (earliest: {}, allReplies: {})", canEnter, earliestRequest,
 				allRepliesReceived);
 
 		return canEnter;
@@ -192,7 +210,7 @@ public class LamportMutexService {
 	 * Processes release message from other process
 	 */
 	public synchronized void receiveRelease(String fromProcessId, long timestamp) {
-		log.debug("Received release from process: {}", fromProcessId);
+		log.info("Received release from process: {}", fromProcessId);
 
 		// Update local clock
 		updateClock(timestamp);
@@ -206,9 +224,10 @@ public class LamportMutexService {
 	 */
 	private void broadcastRequest(Request request) {
 		for (String url : processUrls.values()) {
+			log.info("sending request to {}", url);
 			try {
 				lamportProxy.sendRequest(url, request);
-				log.debug("Sent request to: {}", url);
+				log.info("Sent request to: {}", url);
 			} catch (Exception e) {
 				log.error("Failed to send request to {}: {}", url, e.getMessage());
 				// Consider implementing retry logic or failure detection
@@ -223,8 +242,9 @@ public class LamportMutexService {
 		String targetUrl = processUrls.get(toProcessId);
 		if (targetUrl != null) {
 			try {
+				log.info("Sending reply to: {}", targetUrl);
 				lamportProxy.sendReply(targetUrl, processId, timestamp);
-				log.debug("Sent reply to: {}", targetUrl);
+				log.info("Sent reply to: {}", targetUrl);
 			} catch (Exception e) {
 				log.error("Failed to send reply to {}: {}", targetUrl, e.getMessage());
 			}
@@ -238,7 +258,7 @@ public class LamportMutexService {
 		for (String url : processUrls.values()) {
 			try {
 				lamportProxy.sendRelease(url, processId, timestamp);
-				log.debug("Sent release to: {}", url);
+				log.info("Sent release to: {}", url);
 			} catch (Exception e) {
 				log.error("Failed to send release to {}: {}", url, e.getMessage());
 			}

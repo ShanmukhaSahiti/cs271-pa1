@@ -1,19 +1,31 @@
 package com.cs271.pa1.service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import com.cs271.pa1.dto.ClientPorts;
 
 @Service
 public class ClientPortService {
-	public List<Integer> getClientPorts(String clientName) {
-        return switch(clientName) {
-            case "A" -> List.of(ClientPorts.B.getPort(), ClientPorts.C.getPort());
-            case "B" -> List.of(ClientPorts.A.getPort(), ClientPorts.C.getPort());
-            case "C" -> List.of(ClientPorts.A.getPort(), ClientPorts.B.getPort());
-            default -> throw new IllegalArgumentException("Invalid client name");
-        };
-    }
+
+	@Value("${server.port}")
+	private Integer serverPort;
+
+	private final List<Integer> clientPorts = List.of(8080, 8081, 8082);
+
+	public List<Integer> getClientPorts() {
+		List<Integer> ports = new ArrayList<Integer>(clientPorts);
+		ports.remove(serverPort);
+		return ports;
+	}
+
+//	public void sleep() {
+//		try {
+//			TimeUnit.SECONDS.sleep(3);
+//		} catch (InterruptedException e) {
+//			Thread.currentThread().interrupt();
+//		}
+//	}
 }

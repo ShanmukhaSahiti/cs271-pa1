@@ -23,15 +23,6 @@ public class BlockchainController {
     @Autowired
     private BlockchainService blockchainService;
 
-    @PostMapping("/transfer")
-    public ResponseEntity<String> processTransfer(@RequestBody TransactionDto transaction) {
-        log.info("Received transfer request: {}", transaction);
-        boolean result = blockchainService.initiateTransaction(transaction);
-        return result 
-            ? ResponseEntity.ok("SUCCESS") 
-            : ResponseEntity.badRequest().body("FAILED");
-    }
-
     @GetMapping("/balance/{clientName}")
     public ResponseEntity<BigDecimal> checkBalance(@PathVariable String clientName) {
         BigDecimal balance = blockchainService.checkBalance(clientName);
