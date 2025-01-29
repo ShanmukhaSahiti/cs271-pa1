@@ -4,14 +4,15 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import com.cs271.pa1.dto.ReplyResponse;
 import com.cs271.pa1.dto.Request;
 
 @Component
 public class LamportProxy {
 	private RestTemplate restTemplate = new RestTemplateBuilder().build();
 
-	public void sendRequest(String targetUrl, Request request) {
-		restTemplate.postForObject(targetUrl + "/api/lamport/request", request, Void.class);
+	public ReplyResponse sendRequest(String targetUrl, Request request) {
+		return restTemplate.postForObject(targetUrl + "/api/lamport/request", request, ReplyResponse.class);
 	}
 
 	public void sendReply(String targetUrl, String processId, long timestamp) {

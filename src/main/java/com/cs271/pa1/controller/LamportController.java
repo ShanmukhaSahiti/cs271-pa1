@@ -3,6 +3,7 @@ package com.cs271.pa1.controller;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cs271.pa1.dto.ReplyResponse;
 import com.cs271.pa1.dto.Request;
 import com.cs271.pa1.service.ClientPortService;
 import com.cs271.pa1.service.LamportMutexService;
@@ -27,9 +29,10 @@ public class LamportController {
 	private ClientPortService clientPortService;
 
 	@PostMapping("/request")
-	public void receiveRequest(@RequestBody Request request)  throws InterruptedException{
+	public ResponseEntity<ReplyResponse> receiveRequest(@RequestBody Request request)  throws InterruptedException{
 		//TimeUnit.SECONDS.sleep(3);
-		lamportService.receiveRequest(request);
+		ReplyResponse reply = lamportService.receiveRequest(request);
+        return ResponseEntity.ok(reply);
 	}
 
 	@PostMapping("/reply/{processId}")
