@@ -30,21 +30,14 @@ public class LamportController {
 
 	@PostMapping("/request")
 	public ResponseEntity<ReplyResponse> receiveRequest(@RequestBody Request request)  throws InterruptedException{
-		//TimeUnit.SECONDS.sleep(3);
+		TimeUnit.SECONDS.sleep(3);
 		ReplyResponse reply = lamportService.receiveRequest(request);
         return ResponseEntity.ok(reply);
 	}
 
-	@PostMapping("/reply/{processId}")
-	public void receiveReply(@PathVariable String processId, @RequestParam long timestamp)  throws InterruptedException{
-		//TimeUnit.SECONDS.sleep(3);
-		log.info("receievd reply in controller from{}", processId);
-		lamportService.receiveReply(processId, timestamp);
-	}
-
 	@PostMapping("/release")
 	public void receiveRelease(@RequestParam String processId, @RequestParam long timestamp)  throws InterruptedException{
-		//TimeUnit.SECONDS.sleep(3);
+		TimeUnit.SECONDS.sleep(3);
 		lamportService.receiveRelease(processId, timestamp);
 	}
 }

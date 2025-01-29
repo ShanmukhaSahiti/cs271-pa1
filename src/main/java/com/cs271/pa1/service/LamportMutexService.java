@@ -83,39 +83,39 @@ public class LamportMutexService {
         lamportClock = Math.max(lamportClock, receivedTimestamp) + 1;
     }
 
-    /**
-     * Initiates request for mutual exclusion
-     */
-    public synchronized void requestMutex() {
-        if (inCriticalSection) {
-            throw new IllegalStateException("Already in critical section");
-        }
-
+    public void requestMutex() {
         // Create and timestamp the request
         long currentTimestamp = incrementClock();
         Request request = new Request();
         request.setTimestamp(currentTimestamp);
         request.setProcessId(processId);
+    	synchronized(this) {
+            if (inCriticalSection) {
+                throw new IllegalStateException("Already in critical section");
+            }
+            // Add to local queue
+            requestQueue.add(request);
+            log.info("Added request to queue: {}", request);
 
-        // Add to local queue
-        requestQueue.add(request);
-        log.info("Added request to queue: {}", request);
-
-        // Initialize reply tracker
-        replyTracker.put(processId, Collections.synchronizedSet(new HashSet<>()));
+            // Initialize reply tracker
+            replyTracker.put(processId, Collections.synchronizedSet(new HashSet<>()));
+        }
+        
         log.info("Broadcasting request to all");
         
         // Broadcast request to all other processes and collect replies
+        // This part is not synchronized to prevent deadlock
         for (String url : processUrls.values()) {
             log.info("sending request to {}", url);
             try {
                 ReplyResponse reply = lamportProxy.sendRequest(url, request);
-                // Process reply directly
-                receiveReply(reply.getFromProcessId(), reply.getTimestamp());
+                synchronized(this) {
+                    // Process reply within synchronized block
+                    receiveReply(reply.getFromProcessId(), reply.getTimestamp());
+                }
                 log.info("Received reply from request to: {}", url);
             } catch (Exception e) {
                 log.error("Failed to send request to {}: {}", url, e.getMessage());
-                // Consider implementing retry logic or failure detection
             }
         }
     }
@@ -123,21 +123,23 @@ public class LamportMutexService {
     /**
      * Handles incoming request from other process and returns reply
      */
-    public synchronized ReplyResponse receiveRequest(Request request) {
-        log.info("Received request from process {}: {}", request.getProcessId(), request);
+    public ReplyResponse receiveRequest(Request request) {
+        synchronized(this) {
+            log.info("Received request from process {}: {}", request.getProcessId(), request);
 
-        // Update local clock
-        updateClock(request.getTimestamp());
+            // Update local clock
+            updateClock(request.getTimestamp());
 
-        // Add request to queue
-        requestQueue.add(request);
+            // Add request to queue
+            requestQueue.add(request);
 
-        // Create and return reply with updated timestamp
-        ReplyResponse reply = new ReplyResponse();
-        reply.setFromProcessId(processId);
-        reply.setTimestamp(incrementClock());
-        
-        return reply;
+            // Create reply with updated timestamp
+            ReplyResponse reply = new ReplyResponse();
+            reply.setFromProcessId(processId);
+            reply.setTimestamp(incrementClock());
+            
+            return reply;
+        }
     }
 
     /**
