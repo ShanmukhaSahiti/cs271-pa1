@@ -68,7 +68,7 @@ public class LamportMutexService {
      */
     public synchronized long incrementClock() {
     	++lamportClock;
-        log.info("Incremented clock {},{}", lamportClock, processId);
+//        log.info("Clock <{},{}>", lamportClock, processId);
     	return lamportClock;
     }
 
@@ -77,6 +77,7 @@ public class LamportMutexService {
      */
     public synchronized void updateClock(long receivedTimestamp) {
         lamportClock = Math.max(lamportClock, receivedTimestamp) + 1;
+//        log.info("Clock <{},{}>", lamportClock, processId);
     }
 
     public void requestMutex() {
