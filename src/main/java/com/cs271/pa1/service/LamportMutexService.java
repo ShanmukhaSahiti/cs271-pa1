@@ -54,12 +54,6 @@ public class LamportMutexService {
         for (Integer port : clientPortService.getClientPorts()) {
             registerProcess(port + "", "http://localhost:" + port);
         }
-        for(String p: otherProcesses) {
-            log.info(p);
-        }
-        for(String p: processUrls.keySet()) {
-            log.info(p+"*"+processUrls.get(p));
-        }
     }
 
     /**
@@ -73,7 +67,9 @@ public class LamportMutexService {
      * Increments the Lamport clock
      */
     public synchronized long incrementClock() {
-        return ++lamportClock;
+    	++lamportClock;
+        log.info("Incremented clock {},{}", lamportClock, processId);
+    	return lamportClock;
     }
 
     /**

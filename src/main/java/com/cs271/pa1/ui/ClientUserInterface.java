@@ -34,7 +34,8 @@ public class ClientUserInterface {
 			System.out.println("1. Transfer Money");
 			System.out.println("2. Check Balance");
 			System.out.println("3. View Blockchain");
-			System.out.println("4. Exit");
+			System.out.println("4. View Balance Table");
+			System.out.println("5. Exit");
 			System.out.print("Choose an option: ");
 
 			int choice = scanner.nextInt();
@@ -49,6 +50,9 @@ public class ClientUserInterface {
 				viewBlockchain();
 				break;
 			case 4:
+				viewBalanceTable();
+				break;
+			case 5:
 				System.exit(0);
 			default:
 				System.out.println("Invalid option. Try again.");
@@ -59,6 +63,10 @@ public class ClientUserInterface {
 	private void performTransfer(Scanner scanner) {
 		System.out.print("Enter receiver client name (A/B/C): ");
 		String receiver = scanner.next();
+		
+		if(receiver.equals(clientName)) {
+			System.out.println("Sender and Receiver cannot be the same client");
+		}
 
 		System.out.print("Enter transfer amount: $");
 		BigDecimal amount = scanner.nextBigDecimal();
@@ -81,6 +89,10 @@ public class ClientUserInterface {
 	}
 
 	private void viewBlockchain() {
-		blockchainService.getBlockchain().forEach(System.out::println);
+		blockchainService.printBlockchain();
+	}
+
+	private void viewBalanceTable() {
+		blockchainService.printBalanceTable();
 	}
 }

@@ -4,10 +4,7 @@ import java.math.BigDecimal;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -152,19 +149,15 @@ public class BlockchainService {
 		return balanceTable.getOrDefault(clientName, BigDecimal.ZERO);
 	}
 
-	public List<BlockDto> getBlockchain() {
-		return new ArrayList<>(blockchain);
-	}
-
-	public Map<String, BigDecimal> getBalanceTable() {
-		return new HashMap<>(balanceTable);
-	}
-
-	// Debugging method to print blockchain state
-	public void printBlockchainState() {
-		log.info("Current Blockchain State:");
-		log.info("Balance Table: {}", balanceTable);
-		log.info("Blockchain Size: {}", blockchain.size());
+	public void printBlockchain() {
+		System.out.println("Current Blockchain State:");
+		System.out.println("Blockchain Size: "+ blockchain.size());
 		blockchain.forEach(block -> log.info("Block: {}", block));
 	}
+
+	public void printBalanceTable() {
+		System.out.println("Current Balance Table:");
+		balanceTable.forEach((k, v) -> System.out.println((k + ":" + v)));
+	}
+
 }
