@@ -64,9 +64,9 @@ public class BlockchainService {
 			blockchain.add(0, newBlock);
 
 			clientProxy.broadcastBlock(newBlock);
-			
+
 			updateBalances(transaction);
-			
+
 			log.info("Transaction successful: {}", transaction);
 			return true;
 		} catch (Exception e) {
@@ -101,48 +101,51 @@ public class BlockchainService {
 	private BlockDto createBlock(TransactionDto transaction) {
 		BlockDto block = BlockDto.builder().operation(transaction).timestamp(Instant.now().toEpochMilli()).build();
 
-		// Set previous block hash if blockchain is not empty
+		// Generate hash based on PREVIOUS block's contents
 		if (!blockchain.isEmpty()) {
 			BlockDto previousBlock = blockchain.get(0);
-			block.setPreviousBlockHash(generateBlockHash(previousBlock));
+			// Calculate hash using previous block's operation and hash
+			block.setCurrentBlockHash(generateBlockHash(previousBlock));
+		} else {
+			block.setCurrentBlockHash(null);
 		}
 
-		// Generate current block hash
-		block.setCurrentBlockHash(generateBlockHash(block));
 		return block;
 	}
-	
-	// Add method to receive block from other clients
-    public void receiveBlock(BlockDto block) {
-        blockchain.add(0, block);
-        // Update balance table based on the received block's transaction
-        updateBalances(block.getOperation());
-    }
 
 	private String generateBlockHash(BlockDto block) {
 		try {
 			MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
-			// Create hash input from transaction and previous block hash
-			String hashInput = Optional.ofNullable(block.getOperation())
-					.map(op -> op.getSender() + op.getReceiver() + op.getAmount()).orElse("")
-					+ Optional.ofNullable(block.getPreviousBlockHash()).orElse("");
+			String operationString = Optional.ofNullable(block.getOperation())
+					.map(op -> op.getSender() + op.getReceiver() + op.getAmount().toString()).orElse("");
 
-			byte[] hashBytes = digest.digest(hashInput.getBytes());
-
-			// Convert to hex string
-			StringBuilder hexString = new StringBuilder();
-			for (byte hashByte : hashBytes) {
-				String hex = Integer.toHexString(0xff & hashByte);
-				if (hex.length() == 1)
-					hexString.append('0');
-				hexString.append(hex);
+			String hashInput = operationString;
+			if (block.getCurrentBlockHash() != null) {
+				hashInput += block.getCurrentBlockHash();
 			}
 
+			byte[] hashBytes = digest.digest(hashInput.getBytes());
+			StringBuilder hexString = new StringBuilder();
+			for (byte b : hashBytes) {
+				String hex = Integer.toHexString(0xff & b);
+				if (hex.length() == 1) {
+					hexString.append('0');
+				}
+				hexString.append(hex);
+			}
 			return hexString.toString();
+
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException("SHA-256 algorithm not available", e);
 		}
+	}
+
+	// Add method to receive block from other clients
+	public void receiveBlock(BlockDto block) {
+		blockchain.add(0, block);
+		// Update balance table based on the received block's transaction
+		updateBalances(block.getOperation());
 	}
 
 	public BigDecimal checkBalance(String clientName) {
