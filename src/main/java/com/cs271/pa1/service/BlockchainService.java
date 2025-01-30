@@ -6,11 +6,11 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class BlockchainService {
 	private static final BigDecimal INITIAL_BALANCE = BigDecimal.valueOf(10);
-	private final List<BlockDto> blockchain = new CopyOnWriteArrayList<>();
+	private final LinkedList<BlockDto> blockchain = new LinkedList<>();
 	private final Map<String, BigDecimal> balanceTable = new ConcurrentHashMap<>();
 
 	@Autowired
@@ -61,7 +61,7 @@ public class BlockchainService {
 
 			// Create and add block
 			BlockDto newBlock = createBlock(transaction);
-			blockchain.add(0, newBlock);
+			blockchain.addFirst(newBlock);
 
 			clientProxy.broadcastBlock(newBlock);
 
@@ -103,7 +103,7 @@ public class BlockchainService {
 
 		// Generate hash based on PREVIOUS block's contents
 		if (!blockchain.isEmpty()) {
-			BlockDto previousBlock = blockchain.get(0);
+			BlockDto previousBlock = blockchain.getFirst();
 			// Calculate hash using previous block's operation and hash
 			block.setCurrentBlockHash(generateBlockHash(previousBlock));
 		} else {
