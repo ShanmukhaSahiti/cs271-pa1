@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cs271.pa1.dto.BlockDto;
 import com.cs271.pa1.service.BlockchainService;
-import com.cs271.pa1.service.ClientPortService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,9 +22,6 @@ public class ClientController {
 	@Autowired
 	private BlockchainService blockchainService;
 
-	@Autowired
-	private ClientPortService clientPortService;
-	
 	@PostMapping("/message")
 	public ResponseEntity<String> processMessage(@RequestBody BlockDto blockDto)  throws InterruptedException{
 		log.info("Incoming broadcast message {}", blockDto);
