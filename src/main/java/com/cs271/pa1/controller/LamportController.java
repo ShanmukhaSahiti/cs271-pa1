@@ -26,7 +26,6 @@ public class LamportController {
 	public void receiveRequest(@RequestBody Request request) throws InterruptedException {
 		TimeUnit.SECONDS.sleep(3);
 		lamportService.receiveRequest(request);
-		// return ResponseEntity.ok(reply);
 	}
 
 	@PostMapping("/reply/{processId}")

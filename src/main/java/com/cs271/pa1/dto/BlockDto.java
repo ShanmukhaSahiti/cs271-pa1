@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class BlockDto {
-    private TransactionDto operation;
-    private String currentBlockHash;
-    private Long timestamp;
+	private TransactionDto operation;
+	private String currentBlockHash;
+	private Long timestamp;
 }

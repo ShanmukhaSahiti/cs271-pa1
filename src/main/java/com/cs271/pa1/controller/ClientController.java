@@ -18,12 +18,12 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/client")
 public class ClientController {
-	
+
 	@Autowired
 	private BlockchainService blockchainService;
 
 	@PostMapping("/message")
-	public ResponseEntity<String> processMessage(@RequestBody BlockDto blockDto)  throws InterruptedException{
+	public ResponseEntity<String> processMessage(@RequestBody BlockDto blockDto) throws InterruptedException {
 		log.info("Incoming broadcast message {}", blockDto);
 		TimeUnit.SECONDS.sleep(3);
 		try {

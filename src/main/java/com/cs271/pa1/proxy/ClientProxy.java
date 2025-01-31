@@ -32,11 +32,11 @@ public class ClientProxy {
 		HttpEntity<BlockDto> entity = new HttpEntity<BlockDto>(block, headers);
 
 		for (int port : clientPortService.getClientPorts()) {
-			log.info("Transfer to client on port "+port);
+			log.info("Transfer to client on port " + port);
 			restTemplate.exchange("http://localhost:" + port + "/client/message", HttpMethod.POST, entity,
 					String.class);
 		}
-		
+
 	}
 
 }

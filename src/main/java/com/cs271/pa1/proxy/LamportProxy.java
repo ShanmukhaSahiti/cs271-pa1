@@ -5,7 +5,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import com.cs271.pa1.dto.ReplyResponse;
 import com.cs271.pa1.dto.Request;
 
 @Component
@@ -14,7 +13,7 @@ public class LamportProxy {
 
 	@Async
 	public void sendRequest(String targetUrl, Request request) {
-		restTemplate.postForObject(targetUrl + "/api/lamport/request", request, ReplyResponse.class);
+		restTemplate.postForObject(targetUrl + "/api/lamport/request", request, void.class);
 	}
 
 	@Async

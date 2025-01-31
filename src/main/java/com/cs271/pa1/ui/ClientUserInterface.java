@@ -19,11 +19,9 @@ public class ClientUserInterface {
 	public void start(String clientName) {
 
 		this.clientName = clientName;
-		// Display initial balance
 		System.out.println("Client: " + clientName);
 		System.out.println("Initial Balance: $10");
 
-		// Start interactive menu
 		displayMenu();
 	}
 
@@ -63,8 +61,8 @@ public class ClientUserInterface {
 	private void performTransfer(Scanner scanner) {
 		System.out.print("Enter receiver client name (A/B/C): ");
 		String receiver = scanner.next();
-		
-		if(receiver.equals(clientName)) {
+
+		if (receiver.equals(clientName)) {
 			System.out.println("Sender and Receiver cannot be the same client");
 		}
 
@@ -73,7 +71,6 @@ public class ClientUserInterface {
 
 		TransactionDto transaction = TransactionDto.createTransaction(this.clientName, receiver, amount);
 
-		// Check transaction result
 		BigDecimal beforeBalance = blockchainService.checkBalance(this.clientName);
 		boolean result = blockchainService.initiateTransaction(transaction);
 		BigDecimal afterBalance = blockchainService.checkBalance(this.clientName);

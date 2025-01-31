@@ -19,12 +19,4 @@ public class ClientPortService {
 		ports.remove(serverPort);
 		return ports;
 	}
-
-//	public void sleep() {
-//		try {
-//			TimeUnit.SECONDS.sleep(3);
-//		} catch (InterruptedException e) {
-//			Thread.currentThread().interrupt();
-//		}
-//	}
 }

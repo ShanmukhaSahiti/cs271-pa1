@@ -6,6 +6,6 @@ import lombok.Data;
 
 @Data
 public class BalanceTableDto {
-    private String clientName;
-    private BigDecimal balance;
+	private String clientName;
+	private BigDecimal balance;
 }

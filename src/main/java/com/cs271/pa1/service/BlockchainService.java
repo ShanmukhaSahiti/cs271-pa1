@@ -45,18 +45,16 @@ public class BlockchainService {
 		mutexService.requestMutex();
 		try {
 			while (!mutexService.canEnterCriticalSection()) {
-				Thread.sleep(1000); // Small delay to prevent busy waiting
+				Thread.sleep(1000);
 			}
 			mutexService.enterCriticalSection();
 			log.info("Initiating transaction: {}", transaction);
 
-			// Validate transaction
 			if (!validateTransaction(transaction)) {
 				log.warn("Transaction validation failed: {}", transaction);
 				return false;
 			}
 
-			// Create and add block
 			BlockDto newBlock = createBlock(transaction);
 			blockchain.addFirst(newBlock);
 
@@ -75,10 +73,8 @@ public class BlockchainService {
 	}
 
 	private boolean validateTransaction(TransactionDto transaction) {
-		// Validate sender has sufficient balance
 		BigDecimal senderBalance = balanceTable.getOrDefault(transaction.getSender(), BigDecimal.ZERO);
 
-		// Check if sender has enough balance and transaction amount is positive
 		return senderBalance.compareTo(transaction.getAmount()) >= 0
 				&& transaction.getAmount().compareTo(BigDecimal.ZERO) > 0;
 	}
@@ -88,20 +84,16 @@ public class BlockchainService {
 		String receiver = transaction.getReceiver();
 		BigDecimal amount = transaction.getAmount();
 
-		// Subtract from sender
 		balanceTable.put(sender, balanceTable.get(sender).subtract(amount));
 
-		// Add to receiver (create account if not exists)
 		balanceTable.merge(receiver, amount, BigDecimal::add);
 	}
 
 	private BlockDto createBlock(TransactionDto transaction) {
 		BlockDto block = BlockDto.builder().operation(transaction).timestamp(Instant.now().toEpochMilli()).build();
 
-		// Generate hash based on PREVIOUS block's contents
 		if (!blockchain.isEmpty()) {
 			BlockDto previousBlock = blockchain.getFirst();
-			// Calculate hash using previous block's operation and hash
 			block.setCurrentBlockHash(generateBlockHash(previousBlock));
 		} else {
 			block.setCurrentBlockHash(null);
@@ -138,10 +130,8 @@ public class BlockchainService {
 		}
 	}
 
-	// Add method to receive block from other clients
 	public void receiveBlock(BlockDto block) {
 		blockchain.add(0, block);
-		// Update balance table based on the received block's transaction
 		updateBalances(block.getOperation());
 	}
 
@@ -151,7 +141,7 @@ public class BlockchainService {
 
 	public void printBlockchain() {
 		System.out.println("Current Blockchain State:");
-		System.out.println("Blockchain Size: "+ blockchain.size());
+		System.out.println("Blockchain Size: " + blockchain.size());
 		blockchain.forEach(block -> log.info("Block: {}", block));
 	}
 
