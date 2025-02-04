@@ -64,20 +64,20 @@ public class ClientUserInterface {
 
 		if (receiver.equals(clientName)) {
 			System.out.println("Sender and Receiver cannot be the same client");
+		} else {
+			System.out.print("Enter transfer amount: $");
+			BigDecimal amount = scanner.nextBigDecimal();
+
+			TransactionDto transaction = TransactionDto.createTransaction(this.clientName, receiver, amount);
+
+			BigDecimal beforeBalance = blockchainService.checkBalance(this.clientName);
+			boolean result = blockchainService.initiateTransaction(transaction);
+			BigDecimal afterBalance = blockchainService.checkBalance(this.clientName);
+
+			System.out.println(result ? "SUCCESS" : "FAILED");
+			System.out.println("Before Balance: $" + beforeBalance);
+			System.out.println("After Balance: $" + afterBalance);
 		}
-
-		System.out.print("Enter transfer amount: $");
-		BigDecimal amount = scanner.nextBigDecimal();
-
-		TransactionDto transaction = TransactionDto.createTransaction(this.clientName, receiver, amount);
-
-		BigDecimal beforeBalance = blockchainService.checkBalance(this.clientName);
-		boolean result = blockchainService.initiateTransaction(transaction);
-		BigDecimal afterBalance = blockchainService.checkBalance(this.clientName);
-
-		System.out.println(result ? "SUCCESS" : "FAILED");
-		System.out.println("Before Balance: $" + beforeBalance);
-		System.out.println("After Balance: $" + afterBalance);
 	}
 
 	private void checkBalance(Scanner scanner) {
