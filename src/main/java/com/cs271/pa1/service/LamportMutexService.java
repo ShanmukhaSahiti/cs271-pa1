@@ -173,14 +173,13 @@ public class LamportMutexService {
 				log.error("Failed to send release to {}: {}", url, e.getMessage());
 			}
 		}
-
-		log.info("Released critical section");
+		log.info("Released critical section lamport clock: {}", lamportClock);
 	}
 
 	public synchronized void receiveRelease(String fromProcessId, long timestamp) {
 		log.info("Received release from process: {}", fromProcessId);
 		updateClock(timestamp);
-
+		log.info("lamport clock: {}", lamportClock);
 		requestQueue.removeIf(r -> r.getProcessId().equals(fromProcessId));
 	}
 

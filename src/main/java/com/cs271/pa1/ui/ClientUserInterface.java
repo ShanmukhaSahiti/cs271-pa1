@@ -64,7 +64,10 @@ public class ClientUserInterface {
 
 		if (receiver.equals(clientName)) {
 			System.out.println("Sender and Receiver cannot be the same client");
-		} else {
+		} else if(!(receiver.equals("A") ||  receiver.equals("B") || receiver.equals("C"))) {
+			System.out.println("No client with that receiver");
+		}
+		else {
 			System.out.print("Enter transfer amount: $");
 			BigDecimal amount = scanner.nextBigDecimal();
 
